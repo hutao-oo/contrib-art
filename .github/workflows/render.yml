@@ -1,0 +1,30 @@
+name: Update Contrib Art
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run render script
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_USER: hutao-oo
+        run: python render.py
+      - name: Commit & Push SVG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add art.svg
+          git commit -m "✨ auto update contrib art" || echo "No changes to commit"
+          git push
